@@ -411,6 +411,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'dex': {
+    renderStartImplemented: true,
+  },
+
   'digiteka': {
     renderStartImplemented: true,
   },
