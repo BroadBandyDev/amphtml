@@ -14,7 +14,7 @@ export function dex(global, data) {
  * @return {string}
  */
 function buildUrl(data) {
-  let url = `https://adx.4strokemedia.com/www/delivery/ajs.php?zoneid=${data['zoneid']}`;
+  let url = `https://cdnb.4strokemedia.com/amp/amp_tag.js?zoneid=${data['zoneid']}`;
 
   if (data['videoid']) {
     url += `&videoid=${data['videoid']}`;
