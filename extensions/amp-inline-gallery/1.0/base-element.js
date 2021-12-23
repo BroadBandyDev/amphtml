@@ -1,10 +1,12 @@
 import * as Preact from '#preact';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {InlineGallery} from './component';
+import {BentoInlineGallery} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 import {dict} from '#core/types/object';
 import {setProp} from '#core/context';
 import {useContext, useLayoutEffect} from '#preact';
+
+export const TAG = 'bento-inline-gallery';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -16,7 +18,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = InlineGallery;
+BaseElement['Component'] = BentoInlineGallery;
 
 /** @override */
 BaseElement['detached'] = true;

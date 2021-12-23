@@ -1,15 +1,13 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {MutatorImpl} from '#service/mutator-impl';
-import {installPlatformService} from '#service/platform-impl';
-import {Resource, ResourceState} from '#service/resource';
+import {Resource, ResourceState_Enum} from '#service/resource';
 import {ResourcesImpl} from '#service/resources-impl';
 
 import {installInputService} from '../../src/input';
@@ -48,10 +46,6 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
     mutator.win = resources.win;
     mutator.resources_ = resources;
 
-    installPlatformService(resources.win);
-    const platform = Services.platformFor(resources.win);
-    env.sandbox.stub(platform, 'isIe').returns(false);
-
     installInputService(resources.win);
 
     viewportMock = env.sandbox.mock(mutator.viewport_);
@@ -88,7 +82,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       pause: () => {},
       unmount: () => {},
       isRelayoutNeeded: () => true,
-      /* eslint-disable google-camelcase/google-camelcase */
+      /* eslint-disable local/camelcase */
       contains: (unused_otherElement) => false,
       updateLayoutBox: () => {},
       togglePlaceholder: () => env.sandbox.spy(),
@@ -96,9 +90,9 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
         unused_overflown,
         unused_requestedHeight,
         unused_requestedWidth
-        /* eslint-enable google-camelcase/google-camelcase */
+        /* eslint-enable local/camelcase */
       ) => {},
-      getLayoutPriority: () => LayoutPriority.CONTENT,
+      getLayoutPriority: () => LayoutPriority_Enum.CONTENT,
       signals: () => signals,
       fakeComputedStyle: {
         marginTop: '0px',
@@ -112,7 +106,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
   function createResource(id, rect) {
     const resource = new Resource(id, createElement(rect), resources);
     resource.element['__AMP__RESOURCE'] = resource;
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     resource.initialLayoutBox_ = resource.layoutBox_ = rect;
     resource.changeSize = env.sandbox.spy();
     return resource;
@@ -183,7 +177,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       false
     );
     expect(resources.requestsChangeSize_.length).to.equal(2);
-    resource1.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource1.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource1.unlayout();
     resources.cleanupTasks_(resource1);
     expect(resources.requestsChangeSize_.length).to.equal(1);
@@ -449,7 +443,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
         resources.visible_ = false;
         env.sandbox
           .stub(resources.ampdoc, 'getVisibilityState')
-          .returns(VisibilityState.PRERENDER);
+          .returns(VisibilityState_Enum.PRERENDER);
         mutator.scheduleChangeSize_(
           resource1,
           111,
@@ -1380,7 +1374,7 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
-    element.getLayoutPriority = () => LayoutPriority.CONTENT;
+    element.getLayoutPriority = () => LayoutPriority_Enum.CONTENT;
     element.getLayout = () => 'fixed';
 
     element.isInViewport = () => false;
@@ -1407,7 +1401,7 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
       resources
     );
     resource.element['__AMP__RESOURCE'] = resource;
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
     resource.changeSize = env.sandbox.spy();
     resource.completeCollapse = env.sandbox.spy();

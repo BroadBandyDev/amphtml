@@ -3,9 +3,9 @@ import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {Services} from '#service';
 import {installPlatformService} from '#service/platform-impl';
 
-import {createFixtureIframe, poll} from '#testing/iframe';
+import {createCustomEvent} from '#utils/event-helper';
 
-import {createCustomEvent} from '../../src/event-helper';
+import {createFixtureIframe, poll} from '#testing/iframe';
 
 const IFRAME_HEIGHT = 3000;
 function createFixture() {
@@ -109,7 +109,7 @@ describes.sandboxed('amp-ad 3P', {}, () => {
         // Nevertheless this only happens in test. In real world AMP will not
         // in srcdoc iframe.
         expect(context.sourceUrl).to.equal(
-          platform.isEdge() || platform.isIe()
+          platform.isEdge()
             ? 'http://localhost:9876/context.html'
             : 'about:srcdoc'
         );

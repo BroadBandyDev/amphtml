@@ -2,9 +2,10 @@ import * as Preact from '#preact';
 import {useCallback} from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
+import {propName} from '#preact/utils';
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 export function Arrow({
@@ -38,21 +39,21 @@ export function Arrow({
       disabled={disabled}
       onClick={onClick}
       outsetArrows={outsetArrows}
-      rtl={rtl}
+      rtl={rtl.toString()}
     />
   );
 }
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({
   'aria-disabled': ariaDisabled,
   by,
-  'class': className,
   disabled,
   onClick,
+  [propName('class')]: className,
 }) {
   const classes = useStyles();
   return (

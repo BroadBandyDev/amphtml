@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
+const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.base.json');
 let tsConfigPaths = null;
 
 /**
@@ -46,8 +46,13 @@ function readJsconfigPaths() {
  */
 function getImportResolver() {
   return {
-    'root': ['.'],
-    'alias': readJsconfigPaths(),
+    root: ['.'],
+    alias: readJsconfigPaths(),
+    babelOptions: {
+      caller: {
+        name: 'import-resolver',
+      },
+    },
   };
 }
 

@@ -1,4 +1,4 @@
-import {BaseCarousel} from './component';
+import {BentoBaseCarousel} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '#preact/base-element';
@@ -39,7 +39,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = BaseCarousel;
+BaseElement['Component'] = BentoBaseCarousel;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
@@ -65,19 +65,14 @@ BaseElement['props'] = {
     media: true,
   },
   'autoAdvanceLoops': {attr: 'auto-advance-loops', type: 'number', media: true},
-  'controls': {attr: 'controls', type: 'string', media: true},
-  'orientation': {
-    attr: 'orientation',
-    type: 'string',
-    media: true,
-    default: 'horizontal',
-  },
+  'controls': {attr: 'controls', media: true},
+  'orientation': {attr: 'orientation', media: true, default: 'horizontal'},
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
   'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
   'snapBy': {attr: 'snap-by', type: 'number', media: true},
-  'snapAlign': {attr: 'snap-align', type: 'string', media: true},
+  'snapAlign': {attr: 'snap-align', media: true},
   'visibleCount': {attr: 'visible-count', type: 'number', media: true},
   'children': {
     props: {

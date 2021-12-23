@@ -113,13 +113,8 @@ const lintGlobs = [
 ];
 
 /**
-<<<<<<< HEAD
- * This should not include .js files, since those are handled by eslint:
- *  - forbidden terms: local/no-forbidden-terms
-=======
  * This should not include .js files, since those are handled by eslint via the
  * local/no-forbidden-terms rule.
->>>>>>> d75c2ba8915655fcdec5cd3b72dcecf81d4c250f
  */
 const presubmitGlobs = [
   '**/*.{css,go,md}',
@@ -416,6 +411,9 @@ const htmlFixtureGlobs = [
   '!test/fixtures/e2e/amphtml-ads/image.html',
   '!test/fixtures/e2e/amphtml-ads/lightbox-ad.a4a.html',
   '!test/fixtures/e2e/amphtml-ads/text.html',
+
+  // The following is a server-rendered file which is technically invalid.
+  '!examples/compiler-hydration.html',
 ];
 
 /**

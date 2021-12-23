@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.180 */
+/** Version: 0.1.22.197 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -58,6 +58,15 @@ const AnalyticsEvent = {
   IMPRESSION_SWG_SUBSCRIPTION_MINI_PROMPT: 24,
   IMPRESSION_SWG_CONTRIBUTION_MINI_PROMPT: 25,
   IMPRESSION_CONTRIBUTION_OFFERS: 26,
+  IMPRESSION_TWG_COUNTER: 27,
+  IMPRESSION_TWG_SITE_SUPPORTER_WALL: 28,
+  IMPRESSION_TWG_PUBLICATION: 29,
+  IMPRESSION_TWG_STATIC_BUTTON: 30,
+  IMPRESSION_TWG_DYNAMIC_BUTTON: 31,
+  IMPRESSION_TWG_STICKER_SELECTION_SCREEN: 32,
+  IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
+  IMPRESSION_REGWALL_OPT_IN: 34,
+  IMPRESSION_NEWSLETTER_OPT_IN: 35,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -95,7 +104,30 @@ const AnalyticsEvent = {
   ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
   ACTION_SHOWCASE_REGWALL_GSI_CLICK: 1035,
   ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK: 1036,
+  ACTION_SUBSCRIPTION_OFFERS_CLOSED: 1037,
+  ACTION_CONTRIBUTION_OFFERS_CLOSED: 1038,
+  ACTION_TWG_STATIC_CTA_CLICK: 1039,
+  ACTION_TWG_DYNAMIC_CTA_CLICK: 1040,
+  ACTION_TWG_SITE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1041,
+  ACTION_TWG_DIALOG_SUPPORTER_WALL_CTA_CLICK: 1042,
+  ACTION_TWG_COUNTER_CLICK: 1043,
+  ACTION_TWG_SITE_SUPPORTER_WALL_ALL_THANKS_CLICK: 1044,
+  ACTION_TWG_PAID_STICKER_SELECTED_SCREEN_CLOSE_CLICK: 1045,
+  ACTION_TWG_PAID_STICKER_SELECTION_CLICK: 1046,
+  ACTION_TWG_FREE_STICKER_SELECTION_CLICK: 1047,
+  ACTION_TWG_MINI_SUPPORTER_WALL_CLICK: 1048,
+  ACTION_TWG_CREATOR_BENEFIT_CLICK: 1049,
+  ACTION_TWG_FREE_TRANSACTION_START_NEXT_BUTTON_CLICK: 1050,
+  ACTION_TWG_PAID_TRANSACTION_START_NEXT_BUTTON_CLICK: 1051,
+  ACTION_TWG_STICKER_SELECTION_SCREEN_CLOSE_CLICK: 1052,
+  ACTION_TWG_ARTICLE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1053,
+  ACTION_REGWALL_OPT_IN_BUTTON_CLICK: 1054,
+  ACTION_REGWALL_ALREADY_OPTED_IN_CLICK: 1055,
+  ACTION_NEWSLETTER_OPT_IN_BUTTON_CLICK: 1056,
+  ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   EVENT_PAYMENT_FAILED: 2000,
+  EVENT_REGWALL_OPT_IN_FAILED: 2001,
+  EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -109,6 +141,18 @@ const AnalyticsEvent = {
   EVENT_HAS_METERING_ENTITLEMENTS: 3010,
   EVENT_OFFERED_METER: 3011,
   EVENT_UNLOCKED_FREE_PAGE: 3012,
+  EVENT_INELIGIBLE_PAYWALL: 3013,
+  EVENT_UNLOCKED_FOR_CRAWLER: 3014,
+  EVENT_TWG_COUNTER_VIEW: 3015,
+  EVENT_TWG_SITE_SUPPORTER_WALL_VIEW: 3016,
+  EVENT_TWG_STATIC_BUTTON_VIEW: 3017,
+  EVENT_TWG_DYNAMIC_BUTTON_VIEW: 3018,
+  EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PRIVATE: 3019,
+  EVENT_TWG_POST_TRANSACTION_SETTING_PRIVATE: 3020,
+  EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PUBLIC: 3021,
+  EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
+  EVENT_REGWALL_OPTED_IN: 3023,
+  EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -119,6 +163,7 @@ const EntitlementResult = {
   UNLOCKED_METER: 1003,
   LOCKED_REGWALL: 2001,
   LOCKED_PAYWALL: 2002,
+  INELIGIBLE_PAYWALL: 2003,
 };
 /** @enum {number} */
 const EntitlementSource = {
@@ -168,7 +213,7 @@ class AccountCreationRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -188,6 +233,59 @@ class AccountCreationRequest {
    */
   label() {
     return 'AccountCreationRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class ActionRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?ActionType} */
+    this.action_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?ActionType}
+   */
+  getAction() {
+    return this.action_;
+  }
+
+  /**
+   * @param {!ActionType} value
+   */
+  setAction(value) {
+    this.action_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.action_, // field 1 - action
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'ActionRequest';
   }
 }
 
@@ -238,7 +336,7 @@ class AlreadySubscribedResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -305,6 +403,12 @@ class AnalyticsContext {
 
     /** @private {?string} */
     this.url_ = data[10 + base] == null ? null : data[10 + base];
+
+    /** @private {?Timestamp} */
+    this.clientTimestamp_ =
+      data[11 + base] == null || data[11 + base] == undefined
+        ? null
+        : new Timestamp(data[11 + base], includesLabel);
   }
 
   /**
@@ -462,7 +566,21 @@ class AnalyticsContext {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @return {?Timestamp}
+   */
+  getClientTimestamp() {
+    return this.clientTimestamp_;
+  }
+
+  /**
+   * @param {!Timestamp} value
+   */
+  setClientTimestamp(value) {
+    this.clientTimestamp_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -479,6 +597,7 @@ class AnalyticsContext {
         this.label_, // field 9 - label
         this.clientVersion_, // field 10 - client_version
         this.url_, // field 11 - url
+        this.clientTimestamp_ ? this.clientTimestamp_.toArray(includeLabel) : [], // field 12 - client_timestamp
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -542,7 +661,7 @@ class AnalyticsEventMeta {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -656,7 +775,7 @@ class AnalyticsRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -679,6 +798,59 @@ class AnalyticsRequest {
    */
   label() {
     return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class AudienceActivityClientLogsRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+      this.event_,  // field 1 - event
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AudienceActivityClientLogsRequest';
   }
 }
 
@@ -729,7 +901,7 @@ class EntitlementJwt {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -874,7 +1046,7 @@ class EntitlementsRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -949,7 +1121,7 @@ class EntitlementsResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1105,7 +1277,7 @@ class EventParams {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1181,7 +1353,7 @@ class FinishedLoggingResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1252,7 +1424,7 @@ class LinkSaveTokenRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1306,7 +1478,7 @@ class LinkingInfoResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1326,6 +1498,59 @@ class LinkingInfoResponse {
    */
   label() {
     return 'LinkingInfoResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class OpenDialogRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.urlPath_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUrlPath() {
+    return this.urlPath_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUrlPath(value) {
+    this.urlPath_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.urlPath_, // field 1 - url_path
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'OpenDialogRequest';
   }
 }
 
@@ -1461,7 +1686,7 @@ class SkuSelectedResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1520,7 +1745,7 @@ class SmartBoxMessage {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1573,7 +1798,7 @@ class SubscribeResponse$1 {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1643,7 +1868,7 @@ class Timestamp {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1697,7 +1922,7 @@ class ToastCloseRequest {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1750,7 +1975,7 @@ class ViewSubscriptionsResponse {
   }
 
   /**
-   * @param {boolean} includeLabel
+   * @param {boolean=} includeLabel
    * @return {!Array<?>}
    * @override
    */
@@ -1775,10 +2000,12 @@ class ViewSubscriptionsResponse {
 
 const PROTO_MAP = {
   'AccountCreationRequest': AccountCreationRequest,
+  'ActionRequest': ActionRequest,
   'AlreadySubscribedResponse': AlreadySubscribedResponse,
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
+  'AudienceActivityClientLogsRequest': AudienceActivityClientLogsRequest,
   'EntitlementJwt': EntitlementJwt,
   'EntitlementsRequest': EntitlementsRequest,
   'EntitlementsResponse': EntitlementsResponse,
@@ -1786,6 +2013,7 @@ const PROTO_MAP = {
   'FinishedLoggingResponse': FinishedLoggingResponse,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
+  'OpenDialogRequest': OpenDialogRequest,
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse$1,
@@ -3320,6 +3548,9 @@ class JwtHelper {
 /** Source for Google-provided metering entitlements. */
 const GOOGLE_METERING_SOURCE = 'google:metering';
 
+/** Source for privileged entitlements. */
+const PRIVILEGED_SOURCE = 'privileged';
+
 /** Subscription token for dev mode entitlements. */
 const DEV_MODE_TOKEN = 'GOOGLE_DEV_MODE_TOKEN';
 
@@ -3608,17 +3839,17 @@ class Entitlement {
     if (eq != -1) {
       // Wildcard product (publication:*) unlocks on any entitlement matching publication
       const publication = product.substring(0, eq + 1);
-      if(
+      if (
         publication + '*' == product &&
-        this.products.find((candidate) => candidate.substring(0, eq + 1) == publication)
+        this.products.filter(
+          (candidate) => candidate.substring(0, eq + 1) == publication
+        ).length >= 1
       ) {
         debugLog('enabled with wildcard productId');
         return true;
       }
       // Wildcard entitlement allows any product matching this publication
-      if (
-        this.products.includes(publication + '*')
-      ) {
+      if (this.products.includes(publication + '*')) {
         debugLog('enabled with wildcard entitlement');
         return true;
       }
@@ -3769,6 +4000,7 @@ class SubscribeResponse {
    * @param {?string=} oldSku
    * @param {?string=} swgUserToken
    * @param {?number=} paymentRecurrence
+   * @param {?Object=} requestMetadata
    */
   constructor(
     raw,
@@ -3779,7 +4011,8 @@ class SubscribeResponse {
     completeHandler,
     oldSku = null,
     swgUserToken = null,
-    paymentRecurrence = null
+    paymentRecurrence = null,
+    requestMetadata = null
   ) {
     /** @const {string} */
     this.raw = raw;
@@ -3799,6 +4032,8 @@ class SubscribeResponse {
     this.swgUserToken = swgUserToken;
     /** @const {?number} */
     this.paymentRecurrence = paymentRecurrence;
+    /** @const {?Object} */
+    this.requestMetadata = requestMetadata;
   }
 
   /**
@@ -4351,12 +4586,6 @@ function parseUrl(url) {
 function parseUrlWithA(a, url) {
   a.href = url;
 
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
   /** @type {!LocationDef} */
   const info = {
     href: a.href,
@@ -4369,22 +4598,6 @@ function parseUrlWithA(a, url) {
     hash: a.hash,
     origin: '', // Set below.
   };
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
@@ -4524,16 +4737,86 @@ function wasReferredByGoogle(parsedReferrer) {
  * @package Visible for testing only.
  */
 const CACHE_KEYS = {
+  'zero': 0, //testing value
   'nocache': 1,
   'hr1': 3600000, // 1hr = 1000 * 60 * 60
   'hr12': 43200000, // 12hr = 1000 * 60 * 60 * 12
 };
 
 /**
+ * Default operating Mode
+ */
+const DEFAULT = {
+  frontEnd: 'https://news.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'PROD',
+  feCache: 'hr1',
+};
+
+/**
+ * Default operating Mode
+ */
+const PROD = {
+  frontEnd: 'https://news.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'PROD',
+  feCache: CACHE_KEYS.hr1,
+};
+
+/**
+ * Default operating Mode
+ */
+const AUTOPUSH = {
+  frontEnd: 'https://subscribe-autopush.sandbox.google.com',
+  payEnv: 'PRODUCTION',
+  playEnv: 'AUTOPUSH',
+  feCache: CACHE_KEYS.nocache,
+};
+
+/**
+ * Default operating Mode
+ */
+const QUAL = {
+  frontEnd: 'https://subscribe-qual.sandbox.google.com',
+  payEnv: 'SANDBOX',
+  playEnv: 'STAGING',
+  feCache: CACHE_KEYS.hr1,
+};
+
+/**
+ * Operating modes, only runtime switchgable modes are here
+ * build time modes set the default and are configured in prepare.sh
+ *
+ * IMPORTANT: modes other than prod will only work on google internal networks!
+ * @type {!Object<Object>}
+ * @package Visible for testing only.
+ */
+const MODES = {
+  'default': DEFAULT,
+  'prod': PROD,
+  'autopush': AUTOPUSH,
+  'qual': QUAL,
+};
+
+/**
+ * Check for swg.mode= in url fragemnet if it exists use it
+ * otherwise use the default build mode.
+ * @returns {Object}
+ */
+function getSwgMode() {
+  const query = parseQueryString(self.location.hash);
+  const swgMode = query['swg.mode'];
+  if (swgMode && MODES[swgMode]) {
+    return MODES[swgMode];
+  }
+  return MODES['default'];
+}
+
+/**
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl('https://news.google.com').origin;
+  return parseUrl(getSwgMode().frontEnd).origin;
 }
 
 /**
@@ -4541,7 +4824,7 @@ function feOrigin() {
  * @return {string} The complete URL.
  */
 function serviceUrl(url) {
-  return 'https://news.google.com/swg/_/api/v1' + url;
+  return `${getSwgMode().frontEnd}/swg/_/api/v1` + url;
 }
 
 /**
@@ -4558,9 +4841,19 @@ function adsUrl(url) {
  * @param {Object<string, string>=} params List of extra params to append to the URL.
  * @return {string} The complete URL.
  */
-function feUrl(url, prefix = '', params) {
+function feUrl(
+  url,
+  params = {},
+  usePrefixedHostPath = false,
+  prefix = ''
+) {
   // Add cache param.
-  url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+  const prefixed = prefix
+    ? usePrefixedHostPath
+      ? `swg/${prefix}`
+      : `${prefix}/swg`
+    : 'swg';
+  url = feCached(`${getSwgMode().frontEnd}/${prefixed}/_/ui/v1${url}`);
 
   // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
   const query = parseQueryString(self.location.hash);
@@ -4581,7 +4874,7 @@ function feUrl(url, prefix = '', params) {
  * @return {string} The complete URL including cache param.
  */
 function feCached(url) {
-  return addQueryParam(url, '_', cacheParam('hr1'));
+  return addQueryParam(url, '_', cacheParam(getSwgMode().feCache));
 }
 
 /**
@@ -4590,7 +4883,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.180',
+    '_client': 'SwG 0.1.22.197',
   });
 }
 
@@ -4773,8 +5066,8 @@ class PayStartFlow {
       ({
         'apiVersion': 1,
         'allowedPaymentMethods': ['CARD'],
-        'environment': 'PRODUCTION',
-        'playEnvironment': 'PROD',
+        'environment': getSwgMode().payEnv,
+        'playEnvironment': getSwgMode().playEnv,
         'swg': swgPaymentRequest,
         'i': {
           'startTimeMs': Date.now(),
@@ -4910,6 +5203,7 @@ class PayCompleteFlow {
       'isSubscriptionUpdate': !!response['oldSku'],
       'isOneTime': !!response['paymentRecurrence'],
     };
+
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
       args['idToken'] = response.userData.idToken;
@@ -4926,22 +5220,39 @@ class PayCompleteFlow {
       args['loginHint'] = response.userData && response.userData.email;
     }
 
-    let confirmFeUrl;
+    const /* {!Object<string, string>} */ urlParams = {};
     if (args.productType === ProductType.VIRTUAL_GIFT) {
-      confirmFeUrl = feUrl('/payconfirmiframe', '', {
+      Object.assign(urlParams, {
         productType: args.productType,
         publicationId: args.publicationId,
         offerId: this.sku_,
         origin: parseUrl(this.win_.location.href).origin,
       });
-    } else {
-      confirmFeUrl = feUrl('/payconfirmiframe');
+      if (response.requestMetadata) {
+        urlParams.canonicalUrl = response.requestMetadata.contentId;
+        urlParams.isAnonymous = response.requestMetadata.anonymous;
+      }
+
+      // Add feArgs to be passed via activities.
+      if (response.swgUserToken) {
+        args.swgUserToken = response.swgUserToken;
+      }
+      const orderId = parseOrderIdFromPurchaseDataSafe(response.purchaseData);
+      if (orderId) {
+        args.orderId = orderId;
+      }
     }
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      urlParams.hl = this.clientConfigManager_.getLanguage();
+    }
+    const confirmFeUrl = feUrl('/payconfirmiframe', urlParams);
 
     return (this.activityIframeViewPromise_ = this.clientConfigManager_
       .getClientConfig()
       .then((clientConfig) => {
         args['useUpdatedConfirmUi'] = clientConfig.useUpdatedOfferFlows;
+        args['skipAccountCreationScreen'] =
+          clientConfig.skipAccountCreationScreen;
         return new ActivityIframeView(
           this.win_,
           this.activityPorts_,
@@ -4990,22 +5301,29 @@ class PayCompleteFlow {
     return Promise.all([
       this.activityIframeViewPromise_,
       this.readyPromise_,
+      this.clientConfigManager_.getClientConfig(),
     ]).then((values) => {
       const activityIframeView = values[0];
-      const accountCompletionRequest = new AccountCreationRequest();
-      accountCompletionRequest.setComplete(true);
-      activityIframeView.execute(accountCompletionRequest);
+      const clientConfig = values[2];
+      // Skip account creation screen if requested (needed for AMP)
+      if (!clientConfig.skipAccountCreationScreen) {
+        const accountCompletionRequest = new AccountCreationRequest();
+        accountCompletionRequest.setComplete(true);
+        activityIframeView.execute(accountCompletionRequest);
+      }
       return activityIframeView
         .acceptResult()
         .catch(() => {
           // Ignore errors.
         })
         .then(() => {
-          this.eventManager_.logSwgEvent(
-            AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED,
-            true,
-            getEventParams$1(this.sku_ || '')
-          );
+          if (!clientConfig.skipAccountCreationScreen) {
+            this.eventManager_.logSwgEvent(
+              AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED,
+              true,
+              getEventParams$1(this.sku_ || '')
+            );
+          }
           this.deps_.entitlementsManager().setToastShown(true);
         });
     });
@@ -5080,6 +5398,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
   let productType = ProductType.SUBSCRIPTION;
   let oldSku = null;
   let paymentRecurrence = null;
+  let requestMetadata = null;
 
   if (data) {
     if (typeof data == 'string') {
@@ -5094,10 +5413,10 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
         raw = json['integratorClientCallbackData'];
       }
       if ('paymentRequest' in data) {
-        oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
-        paymentRecurrence = (data['paymentRequest']['swg'] || {})[
-          'paymentRecurrence'
-        ];
+        const swgObj = data['paymentRequest']['swg'] || {};
+        oldSku = swgObj['oldSku'];
+        paymentRecurrence = swgObj['paymentRecurrence'];
+        requestMetadata = swgObj['metadata'];
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
@@ -5123,8 +5442,9 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     productType,
     completeHandler,
     oldSku,
+    swgData['swgUserToken'],
     paymentRecurrence,
-    swgData['swgUserToken']
+    requestMetadata
   );
 }
 
@@ -5172,6 +5492,16 @@ function parseEntitlements(deps, swgData) {
 function parseSkuFromPurchaseDataSafe(purchaseData) {
   return /** @type {?string} */ (
     getPropertyFromJsonString(purchaseData.raw, 'productId') || null
+  );
+}
+
+/**
+ * @param {!PurchaseData} purchaseData
+ * @return {?string}
+ */
+function parseOrderIdFromPurchaseDataSafe(purchaseData) {
+  return /** @type {?string} */ (
+    getPropertyFromJsonString(purchaseData.raw, 'orderId') || null
   );
 }
 
@@ -5283,20 +5613,23 @@ class OffersFlow {
     /** @private  @const {!Array<!string>} */
     this.skus_ = feArgsObj['skus'] || [ALL_SKUS];
 
+    /** @private @const {!Promise<!../model/client-config.ClientConfig>} */
+    this.clientConfig_ = this.clientConfigManager_.getClientConfig();
+
     /** @private @const {!Promise<?ActivityIframeView>} */
-    this.activityIframeViewPromise_ = this.clientConfigManager_
-      .getClientConfig()
-      .then((clientConfig) => {
+    this.activityIframeViewPromise_ = this.clientConfig_.then(
+      (clientConfig) => {
         return this.shouldShow_(clientConfig)
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              feUrl(this.getUrl_(clientConfig)),
+              this.getUrl_(clientConfig),
               feArgsObj,
               /* shouldFadeBody */ true
             )
           : null;
-      });
+      }
+    );
   }
 
   /**
@@ -5388,7 +5721,16 @@ class OffersFlow {
           this.startNativeFlow_.bind(this)
         );
         this.activityIframeView_ = activityIframeView;
-        return this.dialogManager_.openView(this.activityIframeView_);
+        return this.clientConfig_.then((clientConfig) => {
+          if (!this.activityIframeView_) {
+            return;
+          }
+          return this.dialogManager_.openView(
+            this.activityIframeView_,
+            /* hidden */ false,
+            this.getDialogConfig_(clientConfig)
+          );
+        });
       });
     }
     return Promise.resolve();
@@ -5406,14 +5748,35 @@ class OffersFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
+   * Gets display configuration options for the opened dialog. Uses the
+   * responsive desktop design properties if the updated offer flows UI (for
+   * SwG Basic) is enabled.
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {!../components/dialog.DialogConfig}
+   */
+  getDialogConfig_(clientConfig) {
+    return clientConfig.useUpdatedOfferFlows
+      ? {desktopConfig: {isCenterPositioned: true, supportsWideScreen: true}}
+      : {};
+  }
+
+  /**
+   * Returns the full URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
    * @return {string}
    */
   getUrl_(clientConfig) {
-    return clientConfig.useUpdatedOfferFlows
-      ? '/subscriptionoffersiframe'
-      : '/offersiframe';
+    if (!clientConfig.useUpdatedOfferFlows) {
+      return feUrl('/offersiframe');
+    }
+
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      return feUrl('/subscriptionoffersiframe', {
+        'hl': this.clientConfigManager_.getLanguage(),
+      });
+    }
+
+    return feUrl('/subscriptionoffersiframe');
   }
 
   /**
@@ -5833,7 +6196,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.180',
+        '_client': 'SwG 0.1.22.197',
         'supportsEventManager': true,
       },
       args || {}
@@ -6466,6 +6829,33 @@ function getOnExperiments(win) {
 }
 
 /**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {!number} millis
+ * @return {!Timestamp}
+ */
+function toTimestamp(millis) {
+  return new Timestamp(
+    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
+    false
+  );
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6576,6 +6966,12 @@ class AnalyticsService {
     // the user wait too long.
     /** @private {?number} */
     this.timeout_ = null;
+
+    // A callback for setting the client timestamp before sending requests.
+    /** @private {function():!../proto/api_messages.Timestamp} */
+    this.getTimestamp_ = () => {
+      return toTimestamp(Date.now());
+    };
   }
 
   /**
@@ -6679,7 +7075,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.180');
+    context.setClientVersion('SwG 0.1.22.197');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -6761,7 +7157,9 @@ class AnalyticsService {
     const meta = new AnalyticsEventMeta();
     meta.setEventOriginator(event.eventOriginator);
     meta.setIsFromUserAction(!!event.isFromUserAction);
-
+    // Update the of the analytics context to the current time.
+    // This needs to be current for log analysis.
+    this.context_.setClientTimestamp(this.getTimestamp_());
     const request = new AnalyticsRequest();
     request.setEvent(/** @type {!AnalyticsEvent} */ (event.eventType));
     request.setContext(this.context_);
@@ -6939,10 +7337,16 @@ const SWG_I18N_STRINGS = {
     'en': 'Subscribe with Google',
     'ar': 'Google اشترك مع',
     'de': 'Abonnieren mit Google',
+    'en-au': 'Subscribe with Google',
+    'en-ca': 'Subscribe with Google',
+    'en-gb': 'Subscribe with Google',
+    'en-us': 'Subscribe with Google',
     'es': 'Suscríbete con Google',
+    'es-419': 'Suscríbete con Google',
     'es-latam': 'Suscríbete con Google',
     'es-latn': 'Suscríbete con Google',
     'fr': "S'abonner avec Google",
+    'fr-ca': "S'abonner avec Google",
     'hi': 'Google के ज़रिये सदस्यता',
     'id': 'Berlangganan dengan Google',
     'it': 'Abbonati con Google',
@@ -6959,16 +7363,24 @@ const SWG_I18N_STRINGS = {
     'th': 'สมัครฟาน Google',
     'tr': 'Google ile Abone Ol',
     'uk': 'Підписатися через Google',
+    'zh-cn': '通过 Google 订阅',
+    'zh-hk': '透過 Google 訂閱',
     'zh-tw': '透過 Google 訂閱',
   },
   'CONTRIBUTION_TITLE_LANG_MAP': {
     'en': 'Contribute with Google',
     'ar': 'المساهمة باستخدام Google',
     'de': 'Mit Google beitragen',
+    'en-au': 'Contribute with Google',
+    'en-ca': 'Contribute with Google',
+    'en-gb': 'Contribute with Google',
+    'en-us': 'Contribute with Google',
     'es': '	Contribuye con Google',
+    'es-419': 'Contribuir con Google',
     'es-latam': 'Contribuir con Google',
     'es-latn': 'Contribuye con Google',
     'fr': 'Contribuer avec Google',
+    'fr-ca': 'Contribuer avec Google',
     'hi': 'Google खाते की मदद से योगदान करें',
     'id': 'Berkontribusi dengan Google',
     'it': 'Contribuisci con Google',
@@ -6985,6 +7397,8 @@ const SWG_I18N_STRINGS = {
     'th': 'มีส่วนร่วมผ่าน Google',
     'tr': 'Google ile Katkıda Bulun',
     'uk': 'Зробити внесок через Google',
+    'zh-cn': '通过 Google 捐赠',
+    'zh-hk': '透過 Google 提供內容',
     'zh-tw': '透過 Google 捐款',
   },
 };
@@ -7948,27 +8362,31 @@ class UiPredicates {
  */
 class ClientConfig {
   /**
-   * @param {!./auto-prompt-config.AutoPromptConfig=} autoPromptConfig
-   * @param {string=} paySwgVersion
-   * @param {boolean=} useUpdatedOfferFlows
-   * @param {./auto-prompt-config.UiPredicates=} uiPredicates
-   * @param {./attribution-params.AttributionParams=} attributionParams
+   * @param {ClientConfigOptions} options
    */
-  constructor(
+  constructor({
+    attributionParams,
     autoPromptConfig,
     paySwgVersion,
-    useUpdatedOfferFlows,
     uiPredicates,
-    attributionParams
-  ) {
-    /** @const {!./auto-prompt-config.AutoPromptConfig|undefined} */
+    usePrefixedHostPath,
+    useUpdatedOfferFlows,
+    skipAccountCreationScreen,
+  } = {}) {
+    /** @const {./auto-prompt-config.AutoPromptConfig|undefined} */
     this.autoPromptConfig = autoPromptConfig;
 
     /** @const {string|undefined} */
     this.paySwgVersion = paySwgVersion;
 
     /** @const {boolean} */
+    this.usePrefixedHostPath = usePrefixedHostPath || false;
+
+    /** @const {boolean} */
     this.useUpdatedOfferFlows = useUpdatedOfferFlows || false;
+
+    /** @const {boolean} */
+    this.skipAccountCreationScreen = skipAccountCreationScreen || false;
 
     /** @const {./auto-prompt-config.UiPredicates|undefined} */
     this.uiPredicates = uiPredicates;
@@ -8079,7 +8497,7 @@ class ClientConfigManager {
 
   /**
    * Gets the language the UI should be displayed in. See
-   * src/api/basic-subscriptions.ClientOptions.lang. This
+   * src/api/basic-subscriptions.ClientOptions.lang.
    * @return {string}
    */
   getLanguage() {
@@ -8093,6 +8511,19 @@ class ClientConfigManager {
    */
   getTheme() {
     return this.clientOptions_.theme || ClientTheme.LIGHT;
+  }
+
+  /**
+   * Returns whether iframes should also use the language specified in the
+   * client options, rather than the default of letting the iframes decide the
+   * display language. Note that this will return false if the lang option is
+   * not set, even if forceLangInIframes was set.
+   * @return {boolean}
+   */
+  shouldForceLangInIframes() {
+    return (
+      !!this.clientOptions_.forceLangInIframes && !!this.clientOptions_.lang
+    );
   }
 
   /**
@@ -8177,13 +8608,15 @@ class ClientConfigManager {
       );
     }
 
-    return new ClientConfig(
+    return new ClientConfig({
       autoPromptConfig,
       paySwgVersion,
-      json['useUpdatedOfferFlows'],
+      usePrefixedHostPath: json['usePrefixedHostPath'],
+      useUpdatedOfferFlows: json['useUpdatedOfferFlows'],
+      skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
       uiPredicates,
-      attributionParams
-    );
+      attributionParams,
+    });
   }
 }
 
@@ -8243,7 +8676,7 @@ class ContributionsFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              feUrl(this.getUrl_(clientConfig)),
+              this.getUrl_(clientConfig),
               feArgs({
                 'productId': deps.pageConfig().getProductId(),
                 'publicationId': deps.pageConfig().getPublicationId(),
@@ -8333,14 +8766,22 @@ class ContributionsFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
+   * Gets the complete URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
    * @return {string}
    */
   getUrl_(clientConfig) {
-    return clientConfig.useUpdatedOfferFlows
-      ? '/contributionoffersiframe'
-      : '/contributionsiframe';
+    if (!clientConfig.useUpdatedOfferFlows) {
+      return feUrl('/contributionsiframe');
+    }
+
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      return feUrl('/contributionoffersiframe', {
+        'hl': this.clientConfigManager_.getLanguage(),
+      });
+    }
+
+    return feUrl('/contributionoffersiframe');
   }
 
   /**
@@ -8523,7 +8964,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:35px!important;width:560px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:auto!important;margin-right:auto!important;width:560px!important}swg-loading-container.centered-on-desktop{border-radius:8px!important;height:120px!important;min-height:120px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -8808,8 +9249,9 @@ class Graypane$1 {
 class LoadingView {
   /**
    * @param {!Document} doc
+   * @param {!LoadingViewConfig=} config
    */
-  constructor(doc) {
+  constructor(doc, config = {}) {
     /** @private @const {!Document} */
     this.doc_ = doc;
 
@@ -8819,6 +9261,11 @@ class LoadingView {
       'swg-loading-container',
       {}
     );
+    if (config.additionalClasses) {
+      config.additionalClasses.forEach((additionalClass) => {
+        this.loadingContainer_.classList.add(additionalClass);
+      });
+    }
 
     /** @private @const {!Element} */
     this.loading_ = createElement(this.doc_, 'swg-loading', {});
@@ -9112,14 +9559,24 @@ class Dialog {
    * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
+   * @param {!DialogConfig=} dialogConfig Configuration options for the dialog.
    */
-  constructor(doc, importantStyles = {}, styles = {}) {
+  constructor(doc, importantStyles = {}, styles = {}, dialogConfig = {}) {
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
+    const desktopDialogConfig = dialogConfig.desktopConfig || {};
+    const supportsWideScreen = !!desktopDialogConfig.supportsWideScreen;
+
+    const defaultIframeCssClass = `swg-dialog ${
+      supportsWideScreen ? 'swg-wide-dialog' : ''
+    }`;
+    const iframeCssClass =
+      dialogConfig.iframeCssClassOverride || defaultIframeCssClass;
+
     /** @private @const {!FriendlyIframe} */
     this.iframe_ = new FriendlyIframe(doc.getWin().document, {
-      'class': 'swg-dialog',
+      'class': iframeCssClass,
     });
 
     /** @private @const {!Graypane} */
@@ -9158,8 +9615,25 @@ class Dialog {
     /** @private {?./view.View} */
     this.previousProgressView_ = null;
 
-    /** @private {number} */
-    this.maxAllowedHeightRatio_ = 0.9;
+    /** @const @private {number} */
+    this.maxAllowedHeightRatio_ =
+      dialogConfig.maxAllowedHeightRatio !== undefined
+        ? dialogConfig.maxAllowedHeightRatio
+        : 0.9;
+
+    /** @const @private {boolean} */
+    this.positionCenterOnDesktop_ = !!desktopDialogConfig.isCenterPositioned;
+
+    /** @const @private {!MediaQueryList} */
+    this.desktopMediaQuery_ = this.doc_
+      .getWin()
+      .matchMedia('(min-width: 641px)');
+
+    /**
+     * Reference to the listener that acts on changes to desktopMediaQuery.
+     * @private {?function()}
+     */
+    this.desktopMediaQueryListener_ = null;
   }
 
   /**
@@ -9195,6 +9669,24 @@ class Dialog {
   }
 
   /**
+   * Opens the iframe embedded in the given container element.
+   * @param {!Element} containerEl
+   */
+  openInContainer(containerEl) {
+    const iframe = this.iframe_;
+    if (iframe.isConnected()) {
+      throw new Error('already opened');
+    }
+
+    containerEl.appendChild(iframe.getElement());
+
+    return iframe.whenReady().then(() => {
+      this.buildIframe_();
+      return this;
+    });
+  }
+
+  /**
    * Build the iframe with the styling after iframe is loaded.
    * @private
    */
@@ -9207,13 +9699,27 @@ class Dialog {
     injectStyleSheet(resolveDoc(iframeDoc), CSS$1);
 
     // Add Loading indicator.
-    this.loadingView_ = new LoadingView(iframeDoc);
+    const loadingViewClasses = [];
+    if (this.isPositionCenterOnDesktop()) {
+      loadingViewClasses.push('centered-on-desktop');
+    }
+    this.loadingView_ = new LoadingView(iframeDoc, {
+      additionalClasses: loadingViewClasses,
+    });
     iframeBody.appendChild(this.loadingView_.getElement());
 
     // Container for all dynamic content, including 3P iframe.
     this.container_ = createElement(iframeDoc, 'swg-container', {});
     iframeBody.appendChild(this.container_);
     this.setPosition_();
+
+    // Add listener to adjust position when crossing a media query breakpoint.
+    if (this.positionCenterOnDesktop_) {
+      this.desktopMediaQueryListener_ = () => {
+        this.setPosition_();
+      };
+      this.desktopMediaQuery_.addListener(this.desktopMediaQueryListener_);
+    }
   }
 
   /**
@@ -9224,16 +9730,13 @@ class Dialog {
   close(animated = true) {
     let animating;
     if (animated) {
+      const transitionStyles = this.shouldPositionCenter_()
+        ? {'opacity': 0}
+        : {'transform': 'translateY(100%)'};
+
       animating = this.animate_(() => {
         this.graypane_.hide(/* animate */ true);
-        return transition$1(
-          this.getElement(),
-          {
-            'transform': 'translateY(100%)',
-          },
-          300,
-          'ease-out'
-        );
+        return transition$1(this.getElement(), transitionStyles, 300, 'ease-out');
       });
     } else {
       animating = Promise.resolve();
@@ -9244,6 +9747,9 @@ class Dialog {
 
       this.removePaddingToHtml_();
       this.graypane_.destroy();
+      if (this.desktopMediaQueryListener_) {
+        this.desktopMediaQuery_.removeListener(this.desktopMediaQueryListener_);
+      }
     });
   }
 
@@ -9280,6 +9786,22 @@ class Dialog {
    */
   getLoadingView() {
     return this.loadingView_;
+  }
+
+  /**
+   * Returns the max allowed height of the view as a ratio of viewport height.
+   * @return {number}
+   */
+  getMaxAllowedHeightRatio() {
+    return this.maxAllowedHeightRatio_;
+  }
+
+  /**
+   * Returns whether the dialog is center-positioned on desktop screens.
+   * @return {boolean}
+   */
+  isPositionCenterOnDesktop() {
+    return this.positionCenterOnDesktop_;
   }
 
   /**
@@ -9363,13 +9885,16 @@ class Dialog {
       return transition$1(
         this.getElement(),
         {
-          'transform': 'translateY(0)',
+          'transform': this.getDefaultTranslateY_(),
           'opacity': 1,
           'visibility': 'visible',
         },
         300,
         'ease-out'
-      );
+      ).then(() => {
+        // Focus the dialog contents, per WAI-ARIA best practices.
+        this.getElement().focus();
+      });
     });
     this.hidden_ = false;
   }
@@ -9404,14 +9929,20 @@ class Dialog {
             return Promise.resolve();
           }
 
-          setImportantStyles$1(this.getElement(), {
+          const immediateStyles = {
             'height': `${newHeight}px`,
-            'transform': `translateY(${newHeight - oldHeight}px)`,
-          });
+          };
+          if (!this.shouldPositionCenter_()) {
+            immediateStyles['transform'] = `translateY(${
+              newHeight - oldHeight
+            }px)`;
+          }
+          setImportantStyles$1(this.getElement(), immediateStyles);
+
           return transition$1(
             this.getElement(),
             {
-              'transform': 'translateY(0)',
+              'transform': this.getDefaultTranslateY_(),
             },
             300,
             'ease-out'
@@ -9425,7 +9956,9 @@ class Dialog {
             : transition$1(
                 this.getElement(),
                 {
-                  'transform': `translateY(${oldHeight - newHeight}px)`,
+                  'transform': this.shouldPositionCenter_()
+                    ? this.getDefaultTranslateY_()
+                    : `translateY(${oldHeight - newHeight}px)`,
                 },
                 300,
                 'ease-out'
@@ -9437,7 +9970,7 @@ class Dialog {
 
             setImportantStyles$1(this.getElement(), {
               'height': `${newHeight}px`,
-              'transform': 'translateY(0)',
+              'transform': this.getDefaultTranslateY_(),
             });
           });
         });
@@ -9493,28 +10026,18 @@ class Dialog {
   }
 
   /**
-   * Sets the max allowed height as a ratio to the viewport height. For example,
-   * ratio = 0.9 means the max allowed height is 90% of the viewport height.
-   * @param {number} ratio
-   */
-  setMaxAllowedHeightRatio(ratio) {
-    this.maxAllowedHeightRatio_ = ratio;
-  }
-
-  /**
-   * Sets the position of the dialog. Currently 'BOTTOM' is set by default.
-   */
-  setPosition_() {
-    setImportantStyles$1(this.getElement(), this.getPositionStyle_());
-  }
-
-  /**
-   * Add the padding to the containing page so as to not hide the content
-   * behind the popup, if rendered at the bottom.
+   * Update padding-bottom on the containing page to not hide any content
+   * behind the popup, if rendered at the bottom. For centered dialogs, there
+   * should be no added padding.
    * @param {number} newHeight
    * @private
    */
   updatePaddingToHtml_(newHeight) {
+    if (this.shouldPositionCenter_()) {
+      // For centered dialogs, there should be no bottom padding.
+      this.removePaddingToHtml_();
+      return;
+    }
     const bottomPadding = newHeight + 20; // Add some extra padding.
     const htmlElement = this.doc_.getRootElement();
     setImportantStyles$1(htmlElement, {
@@ -9531,12 +10054,52 @@ class Dialog {
   }
 
   /**
+   * Sets the position of the dialog. Currently only supports 'BOTTOM', with
+   * an option of switching to 'CENTER' on desktop screens.
+   */
+  setPosition_() {
+    setImportantStyles$1(this.getElement(), this.getPositionStyle_());
+  }
+
+  /**
+   * Returns whether or not the dialog should have position 'CENTER'.
+   * @return {boolean}
+   * @private
+   */
+  shouldPositionCenter_() {
+    return this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches;
+  }
+
+  /**
    * Returns the styles required to postion the dialog.
    * @return {!Object<string, string|number>}
    * @private
    */
   getPositionStyle_() {
-    return {'bottom': 0};
+    if (this.shouldPositionCenter_()) {
+      return {
+        'top': '50%',
+        'bottom': 0,
+        'transform': this.getDefaultTranslateY_(),
+      };
+    }
+    return {
+      'top': 'auto',
+      'bottom': 0,
+      'transform': this.getDefaultTranslateY_(),
+    };
+  }
+
+  /**
+   * Returns default translateY style for the dialog.
+   * @return {string}
+   * @private
+   */
+  getDefaultTranslateY_() {
+    if (this.shouldPositionCenter_()) {
+      return 'translateY(-50%)';
+    }
+    return 'translateY(0px)';
   }
 }
 
@@ -9595,11 +10158,18 @@ class DialogManager {
 
   /**
    * @param {boolean=} hidden
+   * @param {!./dialog.DialogConfig=} dialogConfig Configuration options for the
+   *     dialog.
    * @return {!Promise<!Dialog>}
    */
-  openDialog(hidden = false) {
+  openDialog(hidden = false, dialogConfig = {}) {
     if (!this.openPromise_) {
-      this.dialog_ = new Dialog(this.doc_);
+      this.dialog_ = new Dialog(
+        this.doc_,
+        /* importantStyles */ {},
+        /* styles */ {},
+        dialogConfig
+      );
       this.openPromise_ = this.dialog_.open(hidden);
     }
     return this.openPromise_;
@@ -9608,16 +10178,13 @@ class DialogManager {
   /**
    * @param {!./view.View} view
    * @param {boolean=} hidden
-   * @param {?number=} maxAllowedHeightRatio The max allowed height of the
-   *    view as a ratio of the viewport height.
+   * @param {!./dialog.DialogConfig=} dialogConfig Configuration options for the
+   *    dialog.
    * @return {!Promise}
    */
-  openView(view, hidden = false, maxAllowedHeightRatio = null) {
+  openView(view, hidden = false, dialogConfig = {}) {
     this.handleCancellations(view);
-    return this.openDialog(hidden).then((dialog) => {
-      if (maxAllowedHeightRatio) {
-        dialog.setMaxAllowedHeightRatio(maxAllowedHeightRatio);
-      }
+    return this.openDialog(hidden, dialogConfig).then((dialog) => {
       return dialog.openView(view);
     });
   }
@@ -10222,8 +10789,8 @@ const ShowcaseEvents = {
     AnalyticsEvent.IMPRESSION_PAYWALL,
   ],
   [ShowcaseEvent.EVENT_SHOWCASE_INELIGIBLE_PAYWALL]: [
-    // TODO(b/181690059): Create showcase ineligible AnalyticsEvent
-    AnalyticsEvent.IMPRESSION_PAYWALL,
+    AnalyticsEvent.EVENT_INELIGIBLE_PAYWALL,
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
   ],
 };
 
@@ -10235,6 +10802,8 @@ const AnalyticsEventToEntitlementResult = {
     EntitlementResult.UNLOCKED_SUBSCRIBER,
   [AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE]: EntitlementResult.UNLOCKED_FREE,
   [AnalyticsEvent.IMPRESSION_PAYWALL]: EntitlementResult.LOCKED_PAYWALL,
+  [AnalyticsEvent.EVENT_INELIGIBLE_PAYWALL]:
+    EntitlementResult.INELIGIBLE_PAYWALL,
 };
 
 /**
@@ -10433,33 +11002,6 @@ function queryStringHasFreshGaaParams(
 }
 
 /**
- * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param {!number} millis
- * @return {!Timestamp}
- */
-function toTimestamp(millis) {
-  return new Timestamp(
-    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
-    false
-  );
-}
-
-/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10516,6 +11058,9 @@ class EntitlementsManager {
 
     /** @private {boolean} */
     this.blockNextNotification_ = false;
+
+    /** @private {boolean} */
+    this.blockNextToast_ = false;
 
     /**
      * String containing encoded metering parameters currently.
@@ -10687,20 +11232,19 @@ class EntitlementsManager {
     let source = null;
 
     switch (event.eventOriginator) {
-      // The indicates the publisher reported it via subscriptions.setShowcaseEntitlement
+      // Publisher JS logged this event.
       case EventOriginator.SHOWCASE_CLIENT:
         source = EntitlementSource.PUBLISHER_ENTITLEMENT;
         break;
-      case EventOriginator.SWG_CLIENT: // Fallthrough, these are the same
-      case EventOriginator.SWG_SERVER:
+      // Swgjs logged this event.
+      case EventOriginator.SWG_CLIENT:
         if (result == EntitlementResult.UNLOCKED_METER) {
-          // Meters from Google require a valid jwt, which is sent by
-          // an entitlement.
+          // The `consumeMeter_` method already tracks this.
           return;
         }
+
         source = EntitlementSource.GOOGLE_SUBSCRIBER_ENTITLEMENT;
         break;
-      // Permission to pingback other sources was not requested
       default:
         return;
     }
@@ -10858,6 +11402,12 @@ class EntitlementsManager {
 
   /**
    */
+  blockNextToast() {
+    this.blockNextToast_ = true;
+  }
+
+  /**
+   */
   unblockNextNotification() {
     this.blockNextNotification_ = false;
   }
@@ -10989,6 +11539,9 @@ class EntitlementsManager {
     // TODO(dvoytenko): what's the right action when pay flow was canceled?
     const blockNotification = this.blockNextNotification_;
     this.blockNextNotification_ = false;
+    // Let people specifically block toasts too, without blocking notifications.
+    const blockToast = this.blockNextToast_;
+    this.blockNextToast_ = false;
     if (blockNotification) {
       return;
     }
@@ -11003,6 +11556,10 @@ class EntitlementsManager {
       this.deps_
         .eventManager()
         .logSwgEvent(AnalyticsEvent.EVENT_NO_ENTITLEMENTS, false);
+      return;
+    }
+
+    if (blockToast) {
       return;
     }
     this.maybeShowToast_(entitlement);
@@ -11024,13 +11581,14 @@ class EntitlementsManager {
 
     const params = new EventParams();
     params.setIsUserRegistered(true);
-    this.deps_
-      .eventManager()
-      .logSwgEvent(
-        AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
-        false,
-        params
-      );
+
+    // Log unlock event.
+    const eventType =
+      entitlement.source === PRIVILEGED_SOURCE
+        ? AnalyticsEvent.EVENT_UNLOCKED_FOR_CRAWLER
+        : AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION;
+    this.deps_.eventManager().logSwgEvent(eventType, false, params);
+
     // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
@@ -11149,7 +11707,11 @@ class EntitlementsManager {
         }
 
         // Add metering params.
-        if (this.publicationId_ && params?.metering?.state) {
+        if (
+          this.publicationId_ &&
+          params?.metering?.state &&
+          queryStringHasFreshGaaParams(this.win_.location.search)
+        ) {
           const meteringStateId = params.metering.state.id;
           if (
             typeof meteringStateId === 'string' &&
@@ -11357,7 +11919,7 @@ class Xhr {
          */
         const targetOrigin = parseUrl(input).origin;
         throw new Error(
-          `XHR Failed fetching (${targetOrigin}/...): (Note: a CORS error above may indicate that this domain is not configured for Subscribe with Google)`,
+          `XHR Failed fetching (${targetOrigin}/...): (Note: a CORS error above may indicate that this publisher or domain is not configured in Publisher Center. The CORS error happens becasue 4xx responses do not set CORS headers.)`,
           reason && reason.message
         );
       })
@@ -12036,6 +12598,9 @@ class LinkCompleteFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
+    /** @private @const {!./client-config-manager.ClientConfigManager} */
+    this.clientConfigManager_ = deps.clientConfigManager();
+
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
@@ -12049,17 +12614,31 @@ class LinkCompleteFlow {
     this.callbacks_ = deps.callbacks();
 
     const index = (response && response['index']) || '0';
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/linkconfirmiframe', '/u/' + index),
-      feArgs({
-        'productId': deps.pageConfig().getProductId(),
-        'publicationId': deps.pageConfig().getPublicationId(),
-      }),
-      /* shouldFadeBody */ true
-    );
+
+    /** @private {?ActivityIframeView} */
+    this.activityIframeView_ = null;
+
+    /** @private @const {!Promise<!ActivityIframeView>} */
+    this.activityIframeViewPromise_ = this.clientConfigManager_
+      .getClientConfig()
+      .then(
+        (clientConfig) =>
+          new ActivityIframeView(
+            this.win_,
+            this.activityPorts_,
+            feUrl(
+              '/linkconfirmiframe',
+              {},
+              clientConfig.usePrefixedHostPath,
+              'u/' + index
+            ),
+            feArgs({
+              'productId': deps.pageConfig().getProductId(),
+              'publicationId': deps.pageConfig().getPublicationId(),
+            }),
+            /* shouldFadeBody */ true
+          )
+      );
 
     /** @private {?function()} */
     this.completeResolver_ = null;
@@ -12075,32 +12654,36 @@ class LinkCompleteFlow {
    * @return {!Promise}
    */
   start() {
-    const promise = this.activityIframeView_.acceptResultAndVerify(
-      feOrigin(),
-      /* requireOriginVerified */ true,
-      /* requireSecureChannel */ true
-    );
-    promise
-      .then((response) => {
-        this.complete_(response);
-      })
-      .catch((reason) => {
-        // Rethrow async.
-        setTimeout(() => {
-          throw reason;
+    return this.activityIframeViewPromise_.then((activityIframeView) => {
+      this.activityIframeView_ = activityIframeView;
+
+      const promise = this.activityIframeView_.acceptResultAndVerify(
+        feOrigin(),
+        /* requireOriginVerified */ true,
+        /* requireSecureChannel */ true
+      );
+      promise
+        .then((response) => {
+          this.complete_(response);
+        })
+        .catch((reason) => {
+          // Rethrow async.
+          setTimeout(() => {
+            throw reason;
+          });
+        })
+        .then(() => {
+          // The flow is complete.
+          this.dialogManager_.completeView(this.activityIframeView_);
         });
-      })
-      .then(() => {
-        // The flow is complete.
-        this.dialogManager_.completeView(this.activityIframeView_);
-      });
-    this.deps_
-      .eventManager()
-      .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
-    this.deps_
-      .eventManager()
-      .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
-    return this.dialogManager_.openView(this.activityIframeView_);
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
+      return this.dialogManager_.openView(this.activityIframeView_);
+    });
   }
 
   /**
@@ -15719,7 +16302,7 @@ const PAY_ORIGIN = {
 
 /** @return {string} */
 function payUrl() {
-  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
+  return feCached(PAY_ORIGIN[getSwgMode().payEnv] + '/gp/p/ui/pay');
 }
 
 /**
@@ -15810,7 +16393,7 @@ class PayClient {
     this.client_ = this.createClient_(
       /** @type {!PaymentOptions} */
       ({
-        environment: 'PRODUCTION',
+        environment: getSwgMode().payEnv,
         'i': {
           'redirectKey': this.redirectVerifierHelper_.restoreKey(),
         },
@@ -16512,7 +17095,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgb(0 0 0/20%),0 2px 2px 0 rgb(0 0 0/14%),0 1px 5px 0 rgb(0 0 0/12%)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -16979,6 +17562,11 @@ class ConfiguredRuntime {
         case 'enablePropensity':
           if (!isBoolean(v)) {
             error = 'Unknown enablePropensity value: ' + v;
+          }
+          break;
+        case 'skipAccountCreationScreen':
+          if (!isBoolean(v)) {
+            error = 'Unknown skipAccountCreationScreen value: ' + v;
           }
           break;
         default:

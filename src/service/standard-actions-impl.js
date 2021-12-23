@@ -1,13 +1,14 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {tryFocus} from '#core/dom';
-import {Layout, getLayoutClass} from '#core/dom/layout';
+import {Layout_Enum, getLayoutClass} from '#core/dom/layout';
 import {computedStyle, toggle} from '#core/dom/style';
 import {isFiniteNumber} from '#core/types';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {dev, user, userAssert} from '../log';
+import {dev, user, userAssert} from '#utils/log';
+
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
@@ -63,6 +64,8 @@ export class StandardActions {
     // Explicitly not setting `Action` as a member to scope installation to one
     // method and for bundle size savings. 💰
     this.installActions_(Services.actionServiceForDoc(context));
+
+    this.initThemeMode_();
   }
 
   /**
@@ -95,6 +98,47 @@ export class StandardActions {
       'toggleClass',
       this.handleToggleClass_.bind(this)
     );
+
+    actionService.addGlobalMethodHandler(
+      'toggleChecked',
+      this.handleToggleChecked_.bind(this)
+    );
+  }
+
+  /**
+   * Handles initiliazing the theme mode.
+   *
+   * This methode needs to be called on page load to set the `amp-dark-mode`
+   * class on the body if the user prefers the dark mode.
+   */
+  initThemeMode_() {
+    if (this.prefersDarkMode_()) {
+      this.ampdoc.waitForBodyOpen().then((body) => {
+        const darkModeClass =
+          body.getAttribute('data-prefers-dark-mode-class') || 'amp-dark-mode';
+
+        body.classList.add(darkModeClass);
+      });
+    }
+  }
+
+  /**
+   * Checks whether the user prefers dark mode based on local storage and
+   * user's operating systen settings.
+   *
+   * @return {boolean}
+   */
+  prefersDarkMode_() {
+    try {
+      const themeMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
+
+      if (themeMode) {
+        return 'yes' === themeMode;
+      }
+    } catch (e) {}
+
+    // LocalStorage may not be accessible
+    return this.ampdoc.win.matchMedia?.('(prefers-color-scheme: dark)').matches;
   }
 
   /**
@@ -107,7 +151,7 @@ export class StandardActions {
    */
   handleAmpTarget_(invocation) {
     // All global `AMP` actions require default trust.
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
     const {args, method, node} = invocation;
@@ -154,6 +198,9 @@ export class StandardActions {
           .catch((reason) => {
             dev().error(TAG, 'Failed to opt out of CID', reason);
           });
+      case 'toggleTheme':
+        this.handleToggleTheme_();
+        return null;
     }
     throw user().createError('Unknown AMP action ', method);
   }
@@ -190,6 +237,30 @@ export class StandardActions {
         user().error(TAG, e);
       }
     );
+  }
+
+  /**
+   * Handles the `toggleTheme` action.
+   *
+   * This action sets the `amp-dark-mode` class on the body element and stores the the preference for dark mode in localstorage.
+   */
+  handleToggleTheme_() {
+    this.ampdoc.waitForBodyOpen().then((body) => {
+      try {
+        const darkModeClass =
+          body.getAttribute('data-prefers-dark-mode-class') || 'amp-dark-mode';
+
+        if (this.prefersDarkMode_()) {
+          body.classList.remove(darkModeClass);
+          this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'no');
+        } else {
+          body.classList.add(darkModeClass);
+          this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'yes');
+        }
+      } catch (e) {
+        // LocalStorage may not be accessible.
+      }
+    });
   }
 
   /**
@@ -314,9 +385,9 @@ export class StandardActions {
   handleShow_(invocation) {
     const {node} = invocation;
     const target = dev().assertElement(node);
-    const ownerWindow = toWin(target.ownerDocument.defaultView);
+    const ownerWindow = getWin(target);
 
-    if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
+    if (target.classList.contains(getLayoutClass(Layout_Enum.NODISPLAY))) {
       user().warn(
         TAG,
         'Elements with layout=nodisplay cannot be dynamically shown.',
@@ -417,16 +488,36 @@ export class StandardActions {
 
     return null;
   }
-}
 
-/**
- * @param {!Node} node
- * @return {!Window}
- */
-function getWin(node) {
-  return toWin(
-    (node.ownerDocument || /** @type {!Document} */ (node)).defaultView
-  );
+  /**
+   * Handles "toggleChecked" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private Visible to tests only.
+   */
+  handleToggleChecked_(invocation) {
+    const target = dev().assertElement(invocation.node);
+    const {args} = invocation;
+
+    this.mutator_.mutateElement(target, () => {
+      if (args['force'] !== undefined) {
+        // must be boolean, won't do type conversion
+        const shouldForce = user().assertBoolean(
+          args['force'],
+          "Optional argument 'force' must be a boolean."
+        );
+        target.checked = shouldForce;
+      } else {
+        if (target.checked === true) {
+          target.checked = false;
+        } else {
+          target.checked = true;
+        }
+      }
+    });
+
+    return null;
+  }
 }
 
 /**

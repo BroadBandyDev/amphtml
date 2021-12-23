@@ -5,7 +5,8 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {TickLabel} from '#core/constants/enums';
+import {TickLabel_Enum} from '#core/constants/enums';
+import {whenDocumentComplete} from '#core/document/ready';
 import * as mode from '#core/mode';
 
 import {Services} from '#service';
@@ -21,6 +22,7 @@ import {installPlatformService} from '#service/platform-impl';
 
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {startupChunk} from './chunk';
+import {markUnresolvedElements} from './custom-element';
 import {installErrorReporting} from './error-reporting';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {maybeTrackImpression} from './impression';
@@ -63,6 +65,7 @@ function bootstrap(ampdoc, perf) {
   startupChunk(self.document, function stub() {
     // Pre-stub already known elements.
     stubElementsForDoc(ampdoc);
+    whenDocumentComplete(self.document).then(() => markUnresolvedElements());
   });
   startupChunk(
     self.document,
@@ -79,7 +82,7 @@ function bootstrap(ampdoc, perf) {
     /* makes the body visible */ true
   );
   startupChunk(self.document, function finalTick() {
-    perf.tick(TickLabel.END_INSTALL_STYLES);
+    perf.tick(TickLabel_Enum.END_INSTALL_STYLES);
     Services.resourcesForDoc(ampdoc).ampInitComplete();
     // TODO(erwinm): move invocation of the `flush` method when we have the
     // new ticks in place to batch the ticks properly.
@@ -122,7 +125,7 @@ startupChunk(self.document, function initial() {
     perf.addEnabledExperiment('esm');
   }
   fontStylesheetTimeout(self);
-  perf.tick(TickLabel.INSTALL_STYLES);
+  perf.tick(TickLabel_Enum.INSTALL_STYLES);
   if (mode.isEsm()) {
     bootstrap(ampdoc, perf);
     return;
@@ -135,13 +138,6 @@ startupChunk(self.document, function initial() {
     /* opt_isRuntimeCss */ true,
     /* opt_ext */ 'amp-runtime'
   );
-  // TODO(kbax) Remove this IE deprecation warning on 26 August 2021.
-  if (Services.platformFor(self).isIe() && self.console) {
-    (console.info || console.log).call(
-      console,
-      'IE Support is being deprecated, in September 2021 IE will no longer be supported. See https://github.com/ampproject/amphtml/issues/34453 for more details.'
-    );
-  }
 });
 
 // Output a message to the console and add an attribute to the <html>

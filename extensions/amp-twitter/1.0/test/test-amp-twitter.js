@@ -3,7 +3,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {serializeMessage} from '#core/3p-frame-messaging';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-twitter-v1.0',
@@ -107,6 +107,71 @@ describes.realWin(
         .getAttribute('name');
       expect(newName).not.to.contain(originalTweetId);
       expect(newName).to.contain(newTweetId);
+    });
+
+    it('should test toggling placeholder off', async () => {
+      element = createElementWithAttributes(doc, 'amp-twitter', {
+        'data-tweetid': '585110598171631616',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const impl = await element.getImpl(false);
+      const togglePlaceholderStub = env.sandbox.stub(impl, 'togglePlaceholder');
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
+      const mockEvent = new CustomEvent('message');
+      mockEvent.data = serializeMessage('embed-size', sentinel, {
+        height: '1000',
+      });
+      mockEvent.source = iframe.contentWindow;
+      win.dispatchEvent(mockEvent);
+
+      expect(togglePlaceholderStub).to.be.calledOnce.calledWith(false);
+    });
+
+    it('should test toggling placeholder on', async () => {
+      element = createElementWithAttributes(doc, 'amp-twitter', {
+        'data-tweetid': '585110598171631616',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const impl = await element.getImpl(false);
+      const togglePlaceholderStub = env.sandbox.stub(impl, 'togglePlaceholder');
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
+      const mockEvent = new CustomEvent('message');
+      mockEvent.data = serializeMessage('no-content', sentinel);
+      mockEvent.source = iframe.contentWindow;
+      win.dispatchEvent(mockEvent);
+
+      expect(togglePlaceholderStub).to.be.calledOnce.calledWith(true);
+    });
+
+    it('should pass the data-loading attribute to the underlying iframe', async () => {
+      element = createElementWithAttributes(doc, 'amp-twitter', {
+        'data-tweetid': '585110598171631616',
+        'data-loading': 'eager',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('eager');
+    });
+
+    it('should set data-loading="auto" if no value is specified', async () => {
+      element = createElementWithAttributes(doc, 'amp-twitter', {
+        'data-tweetid': '585110598171631616',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('auto');
     });
   }
 );

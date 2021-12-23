@@ -7,7 +7,7 @@ import {forwardRef} from '#preact/compat';
 
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 
 // Correct PlayerStates taken from
@@ -66,8 +66,17 @@ function createDefaultInfo() {
  * @return {PreactDef.Renderable}
  * @template T
  */
-function YoutubeWithRef(
-  {autoplay, loop, videoid, liveChannelid, params = {}, credentials, ...rest},
+function BentoYoutubeWithRef(
+  {
+    autoplay,
+    loop,
+    videoid,
+    liveChannelid,
+    onLoad,
+    params = {},
+    credentials,
+    ...rest
+  },
   ref
 ) {
   const datasourceExists =
@@ -127,7 +136,8 @@ function YoutubeWithRef(
     const {'event': event, 'info': parsedInfo} = parsedData;
 
     if (event == 'initialDelivery') {
-      dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      dispatchVideoEvent(currentTarget, VideoEvents_Enum.LOADEDMETADATA);
+      onLoad?.();
       return;
     }
 
@@ -237,6 +247,6 @@ function makeMethodMessage(method) {
   );
 }
 
-const Youtube = forwardRef(YoutubeWithRef);
-Youtube.displayName = 'Youtube'; // Make findable for tests.
-export {Youtube};
+const BentoYoutube = forwardRef(BentoYoutubeWithRef);
+BentoYoutube.displayName = 'BentoYoutube'; // Make findable for tests.
+export {BentoYoutube};

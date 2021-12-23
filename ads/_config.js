@@ -100,7 +100,8 @@ const adConfig = jsonConfiguration({
   'adform': {},
 
   'adfox': {
-    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 
@@ -172,6 +173,15 @@ const adConfig = jsonConfiguration({
   },
 
   'adservsolutions': {},
+
+  'adskeeper': {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.adskeeper.com',
+      'https://servicer.adskeeper.com',
+      'https://s-img.adskeeper.com',
+    ],
+  },
 
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
@@ -292,6 +302,15 @@ const adConfig = jsonConfiguration({
       'https://v.amoad.com',
     ],
   },
+  'amplified': {
+    preconnect: 'https://srv.clickfuse.com',
+    renderStartImplemented: true,
+  },
+
+  'andbeyond': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.andbeyond.media',
+  },
 
   'aniview': {
     renderStartImplemented: true,
@@ -349,6 +368,10 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://static.bh-cdn.com', 'https://core-api.bringhub.io'],
   },
 
+  'broadbandy': {
+    renderStartImplemented: true,
+  },
+
   'broadstreetads': {
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
     renderStartImplemented: true,
@@ -381,6 +404,11 @@ const adConfig = jsonConfiguration({
 
   'colombia': {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
+  },
+
+  'colombiafeed': {
+    prefetch:
+      'https://static.clmbtech.com/c1e/static/themes/js/colombiafeed-amp.js',
   },
 
   'conative': {
@@ -615,6 +643,19 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'insurads': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://tpc.googlesyndication.com',
+      'https://adservice.google.com',
+      'https://cdn.insurads.com',
+      'https://services.insurads.com',
+      'https://messaging.insurads.com',
+    ],
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     renderStartImplemented: true,
@@ -642,7 +683,7 @@ const adConfig = jsonConfiguration({
   },
 
   'jixie': {
-    prefetch: ['https://scripts.jixie.io/jxamp.min.js'],
+    prefetch: ['https://scripts.jixie.media/jxamp.min.js'],
     clientIdScope: '__jxamp',
     clientIdCookieName: '_jx',
     renderStartImplemented: true,
@@ -822,6 +863,10 @@ const adConfig = jsonConfiguration({
 
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
+    renderStartImplemented: true,
+  },
+
+  'myua': {
     renderStartImplemented: true,
   },
 
@@ -1062,11 +1107,22 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'sabavision': {
+    renderStartImplemented: true,
+  },
+
   'sas': {
     renderStartImplemented: true,
   },
 
   'seedingalliance': {},
+
+  'seedtag': {
+    prefetch: 'https://config.seedtag.com/omid/bridge/bridge.js',
+    preconnect: ['https://s.seedtag.com'],
+    consentHandlingOverride: true,
+    renderStartImplemented: true,
+  },
 
   'sekindo': {
     renderStartImplemented: true,
@@ -1240,6 +1296,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'trafficstars': {
+    prefetch: 'https://cdn.tsyndicate.com/sdk/v1/master.spot.js',
+    renderStartImplemented: true,
+  },
+
   'triplelift': {},
 
   'trugaze': {
@@ -1273,12 +1334,6 @@ const adConfig = jsonConfiguration({
 
   'vdoai': {
     prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
-    renderStartImplemented: true,
-  },
-
-  'verizonmedia': {
-    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
-    preconnect: ['https://jill.fc.yahoo.com'],
     renderStartImplemented: true,
   },
 
@@ -1337,6 +1392,7 @@ const adConfig = jsonConfiguration({
   'wunderkind': {
     preconnect: ['https://tag.wknd.ai', 'https://api.bounceexchange.com'],
     renderStartImplemented: true,
+    fullWidthHeightRatio: 4 / 3,
   },
 
   'xlift': {
@@ -1366,7 +1422,8 @@ const adConfig = jsonConfiguration({
   },
 
   'yandex': {
-    prefetch: 'https://an.yandex.ru/system/context_amp.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 

@@ -1,10 +1,6 @@
 import {createElementWithAttributes} from '#core/dom';
-import {
-  AmpFitText,
-  buildDom,
-  calculateFontSize_,
-  updateOverflow_,
-} from '../amp-fit-text';
+import {AmpFitText, calculateFontSize_, updateOverflow_} from '../amp-fit-text';
+import {buildDom} from '../build-dom';
 
 describes.realWin(
   'amp-fit-text component',
@@ -54,6 +50,42 @@ describes.realWin(
       buildDom(fitText2);
 
       expect(fitText1.outerHTML).to.equal(fitText2.outerHTML);
+    });
+
+    it('buildCallback should assign ivars even when server rendered', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        width: '111px',
+        height: '222px',
+      });
+      buildDom(fitText);
+      fitText.setAttribute('i-amphtml-ssr', '');
+      const baseElement = new AmpFitText(fitText);
+      await baseElement.buildCallback();
+
+      expect(baseElement.content_).ok;
+      expect(baseElement.contentWrapper_).ok;
+      expect(baseElement.measurer_).ok;
+    });
+
+    it('buildDom should throw if invalid server rendered dom', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        'i-amphtml-ssr': '',
+      });
+      allowConsoleError(() => {
+        expect(() => buildDom(fitText)).throws(/Invalid server render/);
+      });
+    });
+
+    it('buildDom should not modify dom for server rendered element', async () => {
+      const fitText = createElementWithAttributes(doc, 'amp-fit-text');
+      buildDom(fitText);
+      fitText.setAttribute('i-amphtml-ssr', '');
+
+      const before = fitText.outerHTML;
+      buildDom(fitText);
+      const after = fitText.outerHTML;
+
+      expect(before).equal(after);
     });
 
     it('renders', () => {

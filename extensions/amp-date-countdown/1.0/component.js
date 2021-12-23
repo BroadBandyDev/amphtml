@@ -3,7 +3,8 @@ import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {useEffect, useMemo, useRef, useState} from '#preact';
-import {Wrapper, useRenderer} from '#preact/component';
+import {Wrapper} from '#preact/component';
+import {useRenderer} from '#preact/component/renderer';
 import {useAmpContext} from '#preact/context';
 import {useResourcesNotify} from '#preact/utils';
 
@@ -54,10 +55,10 @@ const DEFAULT_RENDER = (data) =>
   );
 
 /**
- * @param {!DateCountdownPropsDef} props
+ * @param {!BentoDateCountdownDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function DateCountdown({
+export function BentoDateCountdown({
   datetime,
   whenEnded = DEFAULT_WHEN_ENDED,
   locale = DEFAULT_LOCALE,
