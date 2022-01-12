@@ -6,7 +6,7 @@ import {loadScript, validateData} from '#3p/3p';
  */
 export function broadbandy(global, data) {
   validateData(data, ['template', 'domain']);
-  data.url = 'https://bb1.broadbandy.net/amp/app.js';
+  data.url = '/js/app.js';
   data.id = '6d3674c49af4071e414d4adbab038085';
   createIns(global, data);
   loadScript(global, data.url);
